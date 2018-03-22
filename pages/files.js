@@ -14,18 +14,34 @@ class Files extends Component {
             notesList: {},
             currentNote: '',
             contentList: {},
-            currentContent: ''
+            currentContent: '',
+            openKeys: [],
+            siderCollapsed: false
         };
+
+        this.rootSubmenuKeys = [];
     }
 
     componentWillMount = async () => {
         const sideData = await this.handleRequestFiles('Notebooks.json');
         const bookList = sideData && sideData.item && sideData.item.children;
-        this.handleRequestSubMenu(bookList[0].uuid);
 
+        this.rootSubmenuKeys = bookList.map(book => book.uuid);
+        this.handleRequestSubMenu(bookList[0].uuid);
         this.setState({
             bookList
         });
+    }
+
+    onOpenChange = (openKeys) => {
+        const latestOpenKey = openKeys.find(key => this.state.openKeys.indexOf(key) === -1);
+        if (this.rootSubmenuKeys.indexOf(latestOpenKey) === -1) {
+            this.setState({ openKeys });
+        } else {
+            this.setState({
+                openKeys: latestOpenKey ? [latestOpenKey] : [],
+            });
+        }
     }
 
     handleRequestFiles = async (path) => {
@@ -42,7 +58,8 @@ class Files extends Component {
         // this.handleRequestContent(uuid, notesList[uuid][0].uuid);
         this.setState({
             notesList,
-            currentNote: uuid
+            currentNote: uuid,
+            openKeys: [uuid]
         });
     }
 
@@ -81,14 +98,26 @@ class Files extends Component {
 
     render() {
         const {
-            bookList, notesList, currentNote, contentList, currentContent
+            bookList, notesList, currentNote, contentList, currentContent, openKeys, siderCollapsed
         } = this.state;
 
         return (
             <MyLayout>
                 <Layout style={{ minHeight: '100vh' }}>
-                    <Sider style={{ overflow: 'auto', height: '100vh', position: 'fixed', left: 0 }}>
-                        <Menu theme="dark" onClick={this.handleMenuClick} defaultOpenKeys={[currentNote]} defaultSelectedKeys={[currentContent]} mode="inline">
+                    <Sider
+                        style={{
+                            height: '100vh',
+                            overflow: 'auto'
+                        }}
+                    >
+                        <Menu
+                            theme="dark"
+                            onClick={this.handleMenuClick}
+                            openKeys={openKeys}
+                            selectedKeys={[currentContent]}
+                            onOpenChange={this.onOpenChange}
+                            mode="inline"
+                        >
                             {bookList && bookList.map((child) => {
                                 const { uuid, name } = child;
                                 const title = <span><Icon type="file" /><span>{name}</span></span>;
@@ -98,7 +127,7 @@ class Files extends Component {
                                         title={title}
                                         onTitleClick={this.handleTitleClick}
                                     >
-                                        {currentNote && notesList[currentNote] && notesList[currentNote].map((note) => {
+                                        {currentNote === uuid && notesList[currentNote] && notesList[currentNote].map((note) => {
                                             const { uuid: noteUuid, name: noteName } = note;
                                             return (
                                                 <Menu.Item
@@ -113,7 +142,12 @@ class Files extends Component {
                             })}
                         </Menu>
                     </Sider>
-                    <Layout style={{ marginLeft: 200 }}>
+                    <Layout
+                        style={{
+                            height: '100vh',
+                            overflow: 'auto'
+                        }}
+                    >
                         {currentContent && contentList[currentContent] && <NoteContent content={contentList[currentContent]} />}
                     </Layout>
                 </Layout>

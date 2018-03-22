@@ -4,6 +4,7 @@ const Router = require('koa-router');
 const compression = require('compression');
 const koaConnect = require('koa-connect');
 const fs = require('fs');
+const cors = require('koa2-cors');
 
 const port = parseInt(process.env.PORT, 10) || 3000;
 const dev = process.env.NODE_ENV !== 'production';
@@ -69,10 +70,6 @@ app.prepare()
             ctx.respond = false;
         });
 
-        router.get('/fetch', async (ctx) => {
-            ctx.body = 'Hello World';
-        });
-
         router.get('*', async (ctx) => {
             await handle(ctx.req, ctx.res);
             ctx.respond = false;
@@ -83,6 +80,7 @@ app.prepare()
             await next();
         });
 
+        server.use(cors());
         server.use(router.routes());
         server.use(koaConnect(compression()));
         server.listen(port, (err) => {

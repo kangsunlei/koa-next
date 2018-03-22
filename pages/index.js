@@ -1,4 +1,5 @@
 import 'isomorphic-unfetch';
+import Link from 'next/link';
 import React, { Component } from 'react';
 import Layout from '../components/Layout';
 
@@ -13,7 +14,9 @@ export default class MyPage extends Component {
     render() {
         return (
             <Layout>
-                <div>Index</div>
+                <Link href="/f">
+                    <a>Quiver</a>
+                </Link>
             </Layout>
         );
     }
