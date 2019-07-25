@@ -6,6 +6,7 @@ import NoteContent from '../components/NoteContent';
 
 const { Sider } = Layout;
 const { SubMenu } = Menu;
+const baseUrl = 'http://localhost:3000';
 
 class Files extends Component {
     constructor() {
@@ -45,7 +46,7 @@ class Files extends Component {
     }
 
     handleRequestFiles = async (path) => {
-        const res = await fetch(`http://localhost:3000/f/${path}`);
+        const res = await fetch(`${baseUrl}/f/${path}`);
         const result = await res.json();
         return result;
     };
